@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Get stock market updates</title>
+    <style>
+        .container{
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 10%;
+            font-family: Verdana, Geneva, Tahoma, sans-serif;
+            font-weight: 400;
+        }
+        .u-put{
+            padding: 15px 40px;
+            border: 2px solid rgb(10, 160, 97);
+            border-radius: 5px;
+            font-family: Verdana, Geneva, Tahoma, sans-serif;
+            margin-bottom: 10px;
+        }
+        .sub-btn{
+            padding: 14px 18px;
+            background-color: rgb(1, 196, 144);
+            border: 2px solid rgb(1, 196, 144);
+            border-radius: 7px;
+            color: white;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="input-form">
+            <h3>When any stock crasher from the NIFTY 50, You'll receive an update</h3>
+            <form action="/" method="post">
+                <input class="u-put" type="text" name="name" placeholder="Enter your name" autocomplete="off" required>
+                <input class="u-put" type="email" name="email" placeholder="Enter your Email" required>
+                <input type="submit" class="sub-btn" value="Submit">
+            </form>
+        </div>
+    </div>
+</body>
+</html>

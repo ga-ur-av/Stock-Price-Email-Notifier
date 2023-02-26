@@ -2,19 +2,60 @@ const express = require('express');
 const { default: puppeteer } = require('puppeteer');
 const cron = require('node-cron');
 const nodemailer = require('nodemailer');
-const hbs = require('nodemailer-express-handlebars');
+const eHbs = require('nodemailer-express-handlebars');
 const path = require('path');
+const bodyParser = require('body-parser');
+const mongoose = require('mongoose');
+const users = require('./models/schema');
 require('dotenv').config();
 
 const app = express();
 
-cron.schedule('30 10,14 * * *', async () => {
-    console.log('cron is working');
+app.set('views', path.join(__dirname, '/views'));
+app.use(bodyParser.urlencoded({extended: false}));
+app.use(express.json());
+
+app.set('view enginer', 'hbs');
+app.use(express.static('public'));
+
+// Connection to mongoose
+
+mongoose.set('strictQuery', false);
+mongoose.connect(process.env.MONGO_URI, {useNewUrlParser: true})
+.then(() => {
+    console.log('DB Connected');
+})
+.catch((err) => {
+    console.log(err);
 })
 
 app.get('/', (req, res) => {
-    res.send("This is working");
+    res.render('index.hbs');
 });
+
+// collecting data from users
+app.post('/', (req, res) => {
+    const userName = req.body.name;
+    const userEmail = req.body.email;
+    console.log(userName, " \n" + userEmail);
+    const user = new users({
+        name: userName,
+        email: userEmail
+    })
+
+    user.save((err, doc) => {
+        if(!err){
+            res.redirect('./subbed.html')
+        } else{
+            console.log('error is: ' + err);
+        }
+    })
+})
+
+// cron.schedule('45 14 * * *', async () => {
+//     await scrapeChannel('https://groww.in/markets/top-losers?index=GIDXNIFTY100');
+//     console.log('Mail sent successfully');
+// })
 
 var stockApi;
 
@@ -53,7 +94,21 @@ async function scrapeChannel(url) {
 
     let percentage = parseFloat(pTemp).toFixed(2);
 
-    if (percentage * 100 < 1000) {
+    // Getting all the users
+
+    var mailList = [];
+    users.find({}, function(err, allUsers){
+        if(err){
+            console.log(err);
+        }
+        allUsers.forEach(function(users){
+            mailList.push(users.email);
+            return mailList;
+        })
+    })
+
+
+    if (true) {
         function sendmail() {
             const mailTransporter = nodemailer.createTransport({
                 service: 'gmail',
@@ -77,17 +132,18 @@ async function scrapeChannel(url) {
                 extName: ".handlebars",
             }
 
-            mailTransporter.use('compile', hbs(handlebarOptions));
+            mailTransporter.use('compile', eHbs(handlebarOptions));
 
             let mailDetails = {
                 from: process.env.GID,
                 to: process.env.GID,
+                bcc: mailList,
                 subject: `Your stock is down by ${percentage}%`,
                 template: 'email',
                 context: {
                     userN: 'Gaurav',
                     name: stName,
-                    pct: percentage,
+                    pct: percentage + '%',
                     pVal: priceVal,
                     hVal: highVal,
                     lVal: lowVal
@@ -114,8 +170,6 @@ async function scrapeChannel(url) {
         highPrice: highVal,
         downBy: downVal
     }
-
-    // console.log(stockApi);
 
     browser.close();
 
